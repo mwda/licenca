@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/template/template.xhtml">
+
+	<ui:define name="conteudo">
+		<h:form id="formVersao">
+			<p:panel header="Versão - Cadastro">
+				<p:dataTable id="tableVersao"
+					emptyMessage="Nenhum Registro Encontrado" paginator="true"
+					value="#{versaoBean.versoes}" var="versao">
+					<f:facet name="header">
+						<p:commandButton value="Nova Versão"
+							oncomplete="PF('dlgVersao').show();"
+							actionListener="#{versaoBean.novo()}"
+							update=":formDialogo:gridDados" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+							<f:actionListener
+								type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+						</p:commandButton>
+
+					</f:facet>
+					
+
+					<p:column headerText="Software" groupRow="true" sortBy="#{versao.software.nome}"
+						filterBy="#{versao.software.nome}" >
+						<h:outputText value="#{versao.software.nome}" />
+					</p:column>
+
+					<p:column headerText="Versão">
+						<h:outputText value="#{versao.versao}" />
+					</p:column>
+
+					<p:column headerText="Opções" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+
+						<p:commandButton icon="ui-icon-trash"
+							actionListener="#{versaoBean.Excluir}"
+							update=":mensagem :formVersao:tableVersao">
+							<p:confirm header="Confirmação"
+								message="Tem certeza que deseja excluir?" icon="ui-icon-alert" />
+							<f:attribute name="versaoSelecionada" value="#{versao}" />
+						</p:commandButton>
+
+						<p:commandButton icon="ui-icon-pencil"
+							actionListener="#{versaoBean.Editar}"
+							update=":mensagem :formDialogo:gridDados"
+							oncomplete="PF('dlgVersao').show();">
+							<f:attribute name="versaoSelecionada" value="#{versao}" />
+							<f:actionListener
+								type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+						</p:commandButton>
+
+					</p:column>
+				</p:dataTable>
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="Sim" type="button"
+						styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="Não" type="button"
+						styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</p:confirmDialog>
+
+			</p:panel>
+		</h:form>
+
+		<p:dialog header="Versão - Cadastro" widgetVar="dlgVersao"
+			draggable="false" resizable="false" modal="true" showEffect="fade"
+			hideEffect="fade">
+
+			<h:form id="formDialogo">
+				<h:panelGrid id="gridDados" columns="2">
+
+					<p:outputLabel for="software" value="Software" />
+					<p:selectOneMenu id="software" filter="true"
+						value="#{versaoBean.versao.software}" autoWidth="true"
+						converter="omnifaces.SelectItemsConverter" required="true"
+						requiredMessage="O campo Software é Obrigatório">
+						<f:selectItem noSelectionOption="true"
+							itemLabel="Selecione um Software" />
+						<f:selectItems value="#{versaoBean.softwares}" var="software"
+							itemValue="#{software}" itemLabel="#{software.nome}" />
+					</p:selectOneMenu>
+
+
+					<p:outputLabel for="versao" value="Versão" />
+					<p:inputTextarea id="versao" maxlength="100" rows="3" cols="30"
+						value="#{versaoBean.versao.versao}" required="true"
+						requiredMessage="O campo Versão é Obrigatório" />
+
+
+				</h:panelGrid>
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{versaoBean.Salvar}"
+						update=":mensagem :formDialogo:gridDados :formVersao:tableVersao" />
+					<p:commandButton value="Fechar"
+						oncomplete="PF('dlgVersao').hide();" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

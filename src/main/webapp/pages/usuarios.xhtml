@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/template/template.xhtml">
+
+	<ui:define name="conteudo" >
+		<h:form id="formUsuario">
+			<p:panel header="Usuários">
+				<p:dataTable id="tableUsuario"
+					emptyMessage="Nenhum Registro Encontrado" paginator="true"
+					value="#{usuarioBean.usuarios}" var="usuario">
+					<f:facet name="header">
+						<p:commandButton value="Novo Usuário"
+							oncomplete="PF('dlgUsuario').show();"
+							actionListener="#{usuarioBean.novo()}"
+							update=":formDialogo:gridDados" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+							<f:actionListener
+								type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+						</p:commandButton>
+					</f:facet>
+					
+					<p:column headerText="Usuário">
+						<h:outputText value="#{usuario.usuario}" />
+					</p:column>
+
+					<p:column headerText="Nome" sortBy="#{usuario.nome}"
+						filterBy="#{usuario.nome}">
+						<h:outputText value="#{usuario.nome}" />
+					</p:column>
+
+					<p:column headerText="Sobrenome">
+						<h:outputText value="#{usuario.sobrenome}" />
+					</p:column>
+
+					<p:column headerText="E-mail">
+						<h:outputText value="#{usuario.email}" />
+					</p:column>
+
+					<p:column headerText="Nível">
+						<h:outputText value="#{usuario.nivelFormatado}" />
+					</p:column>
+					
+					<p:column headerText="Ativo">
+						<h:outputText value="#{usuario.ativoFormatado}" />
+					</p:column>
+
+
+
+					<p:column headerText="Opções" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+						<p:commandButton icon="ui-icon-trash"
+							actionListener="#{usuarioBean.excluir}"
+							update=" :formUsuario:tableUsuario">
+							<p:confirm header="Confirmação"
+								message="Tem certeza que deseja excluir?" icon="ui-icon-alert" />
+							<f:attribute name="usuarioSelecionado" value="#{usuario}" />
+						</p:commandButton>
+
+						<p:commandButton icon="ui-icon-pencil"
+							actionListener="#{usuarioBean.editar}"
+							update=":mensagem :formDialogo:gridDados"
+							oncomplete="PF('dlgUsuario').show();">
+							<f:attribute name="usuarioSelecionado" value="#{usuario}" />
+							<f:actionListener
+								type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="Sim" type="button"
+						styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="Não" type="button"
+						styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</p:confirmDialog>
+
+			</p:panel>
+		</h:form>
+
+		<p:dialog header="Usuários - Cadastro" widgetVar="dlgUsuario"
+			draggable="false" resizable="false" modal="true" showEffect="fade"
+			hideEffect="fade">
+			<h:form id="formDialogo">
+				<h:panelGrid id="gridDados" columns="2">
+					<p:outputLabel value="Usuário:" />
+					<p:inputText maxlength="32" size="32"
+						value="#{usuarioBean.usuario.usuario}" required="true"
+						requiredMessage="O campo usuário é obrigatório" />
+
+					<p:outputLabel value="Nome:" />
+					<p:inputText maxlength="32" size="32"
+						value="#{usuarioBean.usuario.nome}" required="true"
+						requiredMessage="O campo nome é obrigatório" />
+
+					<p:outputLabel value="Sobrenome:" />
+					<p:inputText maxlength="32" size="32"
+						value="#{usuarioBean.usuario.sobrenome}" />
+
+					<p:outputLabel value="Email:" />
+					<p:inputText maxlength="32" size="32" required="true"
+						requiredMessage="O Campo e-mail é Obrigatório"
+						validatorMessage="Formato de E-mail inválido"
+						value="#{usuarioBean.usuario.email}">
+						<f:validateRegex
+							pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+					</p:inputText>
+
+					<p:outputLabel value="Nível:" />
+					<p:selectOneRadio value="#{usuarioBean.usuario.nivel}"
+						required="true" requiredMessage="O campo nível é obrigatório">
+						<f:selectItem itemLabel="Administrador" itemValue="A" />
+						<f:selectItem itemLabel="Usuário" itemValue="U" />
+					</p:selectOneRadio>
+
+					<p:outputLabel for="senha" value="Senha:" />
+					<p:password id="senha" maxlength="8" size="10" redisplay="true"
+						feedback="true" promptLabel="Digite uma senha. Max 8 caracteres"
+						weakLabel="Senha Fraca" goodLabel="Senha Média"
+						strongLabel="Senha Ótima" value="#{usuarioBean.usuario.senhaSemCriptografia}"
+						required="true" requiredMessage="O campo senha é obrigatório" />
+
+					<p:outputLabel value="Ativo:" />
+					<p:selectBooleanCheckbox value="#{usuarioBean.usuario.ativo}" />
+
+				</h:panelGrid>
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{usuarioBean.salvar()}"
+						update="mensagem :formDialogo:gridDados :formUsuario:tableUsuario" />
+					<p:commandButton value="Fechar"
+						oncomplete="PF('dlgUsuario').hide();" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

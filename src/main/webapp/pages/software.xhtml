@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/template/template.xhtml">
+
+	<ui:define name="conteudo" >
+		<h:body>
+			<h:form id="formSoftware">
+				<p:panel header="Software">
+					<p:dataTable id="tableSoftware"
+						emptyMessage="Nenhum Registro Encontrado" paginator="true"
+						value="#{softwareBean.softwares}" var="software">
+						<f:facet name="header">
+							<p:commandButton value="Novo Software"
+								oncomplete="PF('dlgSoftware').show();"
+								actionListener="#{softwareBean.novo()}"
+								update=":formDialogo:gridDados" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+								<f:actionListener
+									type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+							</p:commandButton>
+						</f:facet>
+
+
+
+						<p:column headerText="Nome" sortBy="#{software.nome}"
+							filterBy="#{software.nome}">
+							<h:outputText value="#{software.nome}" />
+						</p:column>
+
+						<p:column headerText="Descrição">
+							<h:outputText value="#{software.descricao}" />
+						</p:column>
+
+						<p:column headerText="Opções" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+
+							<p:commandButton icon="ui-icon-trash"
+								actionListener="#{softwareBean.Excluir}"
+								update=":formSoftware:tableSoftware">
+								<p:confirm header="Confirmação"
+									message="Tem certeza que deseja excluir?" icon="ui-icon-alert" />
+								<f:attribute name="softwareSelecionado" value="#{software}" />
+							</p:commandButton>
+
+							<p:commandButton icon="ui-icon-pencil"
+								actionListener="#{softwareBean.Editar}"
+								update=":mensagem :formDialogo:gridDados"
+								oncomplete="PF('dlgSoftware').show();">
+								<f:attribute name="softwareSelecionado" value="#{software}" />
+								<f:actionListener
+									type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+							</p:commandButton>
+
+						</p:column>
+					</p:dataTable>
+
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="Sim" type="button"
+							styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+						<p:commandButton value="Não" type="button"
+							styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+					</p:confirmDialog>
+
+				</p:panel>
+			</h:form>
+
+			<p:dialog header="Software - Cadastro" widgetVar="dlgSoftware"
+				draggable="false" resizable="false" modal="true" showEffect="fade"
+				hideEffect="fade">
+				<h:form id="formDialogo">
+					<h:panelGrid id="gridDados" columns="2">
+						<p:outputLabel value="Nome:" />
+						<p:inputText maxlength="30" size="30"
+							value="#{softwareBean.software.nome}" required="true"
+							requiredMessage="O campo Nome é Obrigatório" />
+
+						<p:outputLabel value="Descrição:" />
+						<p:inputTextarea id="iptxarea1" maxlength="100" rows="3" cols="32"
+							value="#{softwareBean.software.descricao}" />
+
+
+					</h:panelGrid>
+					<h:panelGrid columns="2">
+						<p:commandButton value="Salvar"
+							actionListener="#{softwareBean.Salvar()}"
+							update="mensagem :formDialogo:gridDados :formSoftware:tableSoftware" />
+						<p:commandButton value="Fechar"
+							oncomplete="PF('dlgSoftware').hide();" />
+					</h:panelGrid>
+				</h:form>
+			</p:dialog>
+
+		</h:body>
+	</ui:define>
+</ui:composition>

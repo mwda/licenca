@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+
+.ui-layout-north {
+	z-index: 20 !important;
+	overflow: visible !important;
+	border: none;
+}
+
+.ui-layout-center{
+	border: none;
+}
+
+.ui-layout-north .ui-layout-unit-content {
+	overflow: visible !important;
+	border: none
+}
+
+.ui-widget, .ui-widget .ui-widget {
+	font-size: 100% !important;
+}
+
+
+
+
+

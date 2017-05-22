@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/template/template.xhtml">
+
+	<ui:define name="conteudo">
+		<h:body>
+			<h:form id="formLicenca">
+				<p:panel header="Licenças- Cadastro">
+					<p:dataTable id="tableLicenca"
+						emptyMessage="Nenhum Registro Encontrado" paginator="true"
+						rows="10" value="#{licencaBean.licencasDisponiveis}" var="licenca">
+						<f:facet name="header">
+							<p:commandButton value="Nova Licença"
+								oncomplete="PF('dlgLicenca').show();"
+								actionListener="#{licencaBean.novo()}"
+								update=":mensagem formDialogo:gridDados">
+								<f:actionListener
+									type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+							</p:commandButton>
+						</f:facet>
+
+						<p:column headerText="Patrimônio">
+							<h:outputText value="#{licenca.patrimonio}" />
+						</p:column>
+
+						<p:column headerText="N. Serie do Equipamento">
+							<h:outputText value="#{licenca.numSeriePc}" />
+						</p:column>
+
+						<p:column headerText="Software - Versão">
+							<h:outputText
+								value="#{licenca.versao.software.nome} - #{licenca.versao.versao}" />
+						</p:column>
+
+						<p:column headerText="Chave" filterBy="#{licenca.chave}">
+							<h:outputText value="#{licenca.chave}" />
+						</p:column>
+
+						<p:column headerText="Observações">
+							<h:outputText value="#{licenca.observacoes}" />
+						</p:column>
+
+						<p:column headerText="Usuário">
+							<h:outputText value="#{licenca.usuario.nome}" />
+						</p:column>
+
+						<p:column headerText="Opções" rendered="#{autenticacaoBean.temPermissoes(['A'])}">
+
+							<p:commandButton icon="ui-icon-trash"
+								actionListener="#{licencaBean.Excluir}"
+								update=":mensagem :formLicenca:tableLicenca">
+								<p:confirm header="Confirmação"
+									message="Tem certeza que deseja excluir?" icon="ui-icon-alert" />
+								<f:attribute name="licencaSelecionada" value="#{licenca}" />
+							</p:commandButton>
+
+							<p:commandButton icon="ui-icon-pencil"
+								actionListener="#{licencaBean.Editar}"
+								update=":mensagem :formDialogo:gridDados"
+								oncomplete="PF('dlgLicenca').show();">
+								<f:attribute name="licencaSelecionada" value="#{licenca}" />
+								<f:actionListener
+									type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="Sim" type="button"
+							styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+						<p:commandButton value="Não" type="button"
+							styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+					</p:confirmDialog>
+
+				</p:panel>
+			</h:form>
+
+			<p:dialog header="Licenças - Cadastro" widgetVar="dlgLicenca"
+				draggable="false" resizable="false" modal="true" showEffect="fade"
+				hideEffect="fade">
+				<h:form id="formDialogo">
+					<h:panelGrid id="gridDados" columns="2">
+
+						<p:outputLabel for="patrimonio" value="Patrimônio:" />
+						<p:inputMask id="patrimonio" maxlength="10" size="32"
+							value="#{licencaBean.licenca.patrimonio}" mask="99999-9999" />
+
+						<p:outputLabel for="nserie" value="N. de Serie:" />
+						<p:inputText id="nserie" maxlength="15" size="32"
+							value="#{licencaBean.licenca.numSeriePc}" />
+
+						<p:outputLabel for="software" value="Software:" />
+						<p:selectOneMenu id="software" filter="true"
+							value="#{licencaBean.software}" autoWidth="true"
+							converter="omnifaces.SelectItemsConverter">
+							<f:selectItem noSelectionOption="true"
+								itemLabel="Selecione um Software" />
+							<f:selectItems value="#{licencaBean.softwares}" var="software"
+								itemValue="#{software}" itemLabel="#{software.nome}" />
+							<p:ajax listener="#{licencaBean.Popular}"
+								update=":formDialogo:versao" />
+						</p:selectOneMenu>
+
+						<p:outputLabel for="versao" value="Versão:" />
+						<p:selectOneMenu id="versao" filter="true"
+							value="#{licencaBean.licenca.versao}" autoWidth="true"
+							converter="omnifaces.SelectItemsConverter" required="true"
+							requiredMessage="O campo Software é Obrigatório">
+							<f:selectItem noSelectionOption="true"
+								itemLabel="Selecione uma  Versão" />
+							<f:selectItems value="#{licencaBean.versoes}" var="versao"
+								itemValue="#{versao}" itemLabel="#{versao.versao}" />
+						</p:selectOneMenu>
+
+						<p:outputLabel for="chave" value="Chave:" />
+						<p:inputText id="chave" maxlength="255" size="32" required="true"
+							requiredMessage="O Campo Chave é Obrigatório."
+							value="#{licencaBean.licenca.chave}" />
+
+						<p:outputLabel for="observacoes" value="Observações:" />
+						<p:inputTextarea id="observacoes" size="32" maxlength="255"
+							value="#{licencaBean.licenca.observacoes}"/>
+					
+						<p:outputLabel for="usuario" value="Usuário:" />
+						<p:inputText id="usuario" value="#{licencaBean.licenca.usuario.nome}">
+						
+						</p:inputText>
+					
+
+					</h:panelGrid>
+
+					<h:panelGrid columns="2">
+						<p:commandButton value="Salvar"
+							actionListener="#{licencaBean.Salvar()}"
+							update=":mensagem :formDialogo:gridDados :formLicenca:tableLicenca" />
+
+						<p:commandButton value="Fechar"
+							oncomplete="PF('dlgLicenca').hide();" />
+					</h:panelGrid>
+				</h:form>
+			</p:dialog>
+		</h:body>
+	</ui:define>
+</ui:composition>
